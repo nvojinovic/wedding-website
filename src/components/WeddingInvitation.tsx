@@ -413,17 +413,12 @@ function Hero() {
           </motion.span>
         </h1>
 
-        <div className="mt-10 flex flex-col items-center gap-3">
-          <div className="flex items-center gap-3 text-sage-700">
-            <span className="h-px w-10 bg-sage-400" />
-            <span className="font-serif-display text-xl italic sm:text-2xl">
-              31. maj
-            </span>
-            <span className="h-px w-10 bg-sage-400" />
-          </div>
-          <p className="text-[0.7rem] uppercase tracking-[0.35em] text-sage-600/80">
-            31. maj • Oficirski dom • Letnja pozornica
-          </p>
+        <div className="mt-10 flex items-center justify-center gap-3 text-sage-700">
+          <span className="h-px w-10 bg-sage-400" />
+          <span className="font-serif-display text-xl italic sm:text-2xl">
+            31. maj
+          </span>
+          <span className="h-px w-10 bg-sage-400" />
         </div>
 
         <motion.div
