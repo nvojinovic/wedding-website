@@ -25,8 +25,11 @@ const messages = {
 
 const waLink = (msg: string) =>
   `https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`;
+// Viber doesn't support a wa.me-style web link — it's an app deep link only.
+// `forward` opens Viber with the message prefilled; the user picks the
+// bride/groom from their contacts. Works reliably on any device with Viber.
 const viberLink = (msg: string) =>
-  `viber://chat?number=%2B${phoneNumber}&text=${encodeURIComponent(msg)}`;
+  `viber://forward?text=${encodeURIComponent(msg)}`;
 
 const rsvpLinks = {
   confirm: { wa: waLink(messages.confirm), viber: viberLink(messages.confirm) },
