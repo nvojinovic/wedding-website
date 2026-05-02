@@ -654,12 +654,12 @@ function Gallery() {
           className="mt-12 mx-auto max-w-sm"
         >
           {/* Eyebrow above the photo */}
-          <div className="mb-5 flex items-center justify-center gap-3">
-            <div className="h-px w-8 bg-gold/50" />
-            <p className="text-[0.65rem] uppercase tracking-[0.4em] text-sage-600">
+          <div className="mb-5 flex items-center justify-center">
+            <div className="hidden h-px w-8 shrink-0 bg-gold/50 sm:block" />
+            <p className="max-w-[15rem] text-center text-[0.65rem] uppercase leading-5 tracking-[0.32em] text-sage-600 sm:mx-3 sm:max-w-none sm:tracking-[0.4em]">
               Pariz · Ovde smo odlučili zauvek
             </p>
-            <div className="h-px w-8 bg-gold/50" />
+            <div className="hidden h-px w-8 shrink-0 bg-gold/50 sm:block" />
           </div>
 
           <div className="group relative">
