@@ -657,7 +657,7 @@ function Gallery() {
           <div className="mb-5 flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-gold/50" />
             <p className="text-[0.65rem] uppercase tracking-[0.4em] text-sage-600">
-              Pariz · Tu je sve počelo
+              Pariz · Ovde smo odlučili zauvek
             </p>
             <div className="h-px w-8 bg-gold/50" />
           </div>
