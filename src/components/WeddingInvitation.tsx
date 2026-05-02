@@ -137,9 +137,8 @@ function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
     <motion.section
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.5 } }}
-      className="relative flex min-h-screen items-center justify-center px-6 py-12"
+      className="relative flex min-h-screen flex-col items-center justify-center px-6 py-12 text-center"
     >
-      <div className="flex flex-col items-center text-center">
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -163,15 +162,14 @@ function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
           type="button"
           onClick={handleClick}
           aria-label="Otvori pozivnicu"
-          className="envelope-perspective group relative cursor-pointer focus:outline-none"
+          className="envelope-perspective w-full max-w-[22rem] cursor-pointer focus:outline-none"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             whileHover={{ scale: opening ? 1 : 1.02 }}
-            style={{ width: "min(22rem, calc(100vw - 3rem))", aspectRatio: "22/15" }}
-            className="relative"
+            className="relative w-full aspect-[22/15]"
           >
             {/* Envelope body */}
             <div className="absolute inset-0 rounded-md bg-gradient-to-br from-ivory to-beige shadow-envelope ring-1 ring-sage-200/60" />
@@ -200,7 +198,7 @@ function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
             <div
               className="absolute inset-x-0 bottom-0 z-20 h-1/2"
               style={{
-                clipPath: "polygon(0 100%, 50% 30%, 100% 100%)",
+                clipPath: "polygon(0 100%, 50% 0%, 100% 100%)",
                 background:
                   "linear-gradient(180deg, #efe6d6 0%, #e3d6c0 100%)",
               }}
@@ -241,22 +239,22 @@ function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
             />
 
             {/* Wax seal */}
-            <motion.div
-              className="absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2"
-              initial={{ scale: 1, opacity: 1 }}
-              animate={
-                opening
-                  ? { scale: 0.4, opacity: 0, transition: { duration: 0.4 } }
-                  : { scale: 1, opacity: 1 }
-              }
-            >
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-sage-500 to-sage-700 shadow-lg ring-2 ring-sage-300/60">
+            <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+              <motion.div
+                initial={{ scale: 1, opacity: 1 }}
+                animate={
+                  opening
+                    ? { scale: 0.4, opacity: 0, transition: { duration: 0.4 } }
+                    : { scale: 1, opacity: 1 }
+                }
+                className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-sage-500 to-sage-700 shadow-lg ring-2 ring-sage-300/60"
+              >
                 <span className="font-serif-display text-xl italic text-cream">
                   I&amp;D
                 </span>
                 <span className="absolute inset-1 rounded-full ring-1 ring-gold/50" />
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         </button>
 
@@ -274,7 +272,6 @@ function EnvelopeIntro({ onOpen }: { onOpen: () => void }) {
           </button>
           <ChevronDown className="h-4 w-4 animate-floatY text-sage-500" />
         </motion.div>
-      </div>
     </motion.section>
   );
 }
