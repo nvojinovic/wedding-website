@@ -14,12 +14,24 @@ import {
 /*  EASY-TO-EDIT CONFIG                                                */
 /* ------------------------------------------------------------------ */
 
-// Replace with the bride/groom's WhatsApp number in international format
-// (no leading "+", no spaces). Example: "381641234567"
-const whatsappNumber = "381XXXXXXXXX";
+// Phone number in international format, no leading "+", no spaces.
+// Example: "381641234567" (Serbia: 381 + number without leading 0).
+const phoneNumber = "381XXXXXXXXX";
 
-const confirmHref = `https://wa.me/${whatsappNumber}?text=Pozdrav%2C%20potvr%C4%91ujem%20dolazak%20na%20ven%C4%8Danje%20Ivane%20i%20Dimitrija.`;
-const declineHref = `https://wa.me/${whatsappNumber}?text=Pozdrav%2C%20na%C5%BEalost%20ne%C4%87u%20mo%C4%87i%20da%20do%C4%91em%20na%20ven%C4%8Danje%20Ivane%20i%20Dimitrija.`;
+const messages = {
+  confirm: "Pozdrav, potvrđujem dolazak na venčanje Ivane i Dimitrija.",
+  decline: "Pozdrav, nažalost neću moći da dođem na venčanje Ivane i Dimitrija.",
+};
+
+const waLink = (msg: string) =>
+  `https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`;
+const viberLink = (msg: string) =>
+  `viber://chat?number=%2B${phoneNumber}&text=${encodeURIComponent(msg)}`;
+
+const rsvpLinks = {
+  confirm: { wa: waLink(messages.confirm), viber: viberLink(messages.confirm) },
+  decline: { wa: waLink(messages.decline), viber: viberLink(messages.decline) },
+};
 
 // Google Maps placeholder links — replace with the real ones
 const officersHomeMapUrl =
@@ -302,6 +314,7 @@ function Invitation() {
 /* Sticky bottom bar — mobile only, quick RSVP for WhatsApp visitors */
 function StickyRsvpBar() {
   const [visible, setVisible] = useState(false);
+  const [intent, setIntent] = useState<Intent | null>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => setVisible(true), 1400);
@@ -309,45 +322,45 @@ function StickyRsvpBar() {
   }, []);
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ y: 120, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 120, opacity: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-0 left-0 right-0 z-50 sm:hidden"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          <div className="mx-4 mb-3 overflow-hidden rounded-2xl border border-sage-200/60 bg-cream/95 shadow-envelope backdrop-blur-md">
-            <p className="border-b border-sage-100 px-4 py-2 text-center text-[0.65rem] uppercase tracking-[0.3em] text-sage-600/80">
-              Potvrdi dolazak
-            </p>
-            <div className="flex">
-              <a
-                href={confirmHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm font-medium text-sage-700 transition active:bg-sage-50"
-              >
-                <Check className="h-4 w-4 text-sage-600" />
-                Dolazim
-              </a>
-              <span className="w-px bg-sage-100" />
-              <a
-                href={declineHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm text-sage-500 transition active:bg-sage-50"
-              >
-                <X className="h-4 w-4" />
-                Ne dolazim
-              </a>
+    <>
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ y: 120, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 120, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-0 left-0 right-0 z-50 sm:hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          >
+            <div className="mx-4 mb-3 overflow-hidden rounded-2xl border border-sage-200/60 bg-cream/95 shadow-envelope backdrop-blur-md">
+              <p className="border-b border-sage-100 px-4 py-2 text-center text-[0.65rem] uppercase tracking-[0.3em] text-sage-600/80">
+                Potvrdi dolazak
+              </p>
+              <div className="flex">
+                <button
+                  onClick={() => setIntent("confirm")}
+                  className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm font-medium text-sage-700 transition active:bg-sage-50"
+                >
+                  <Check className="h-4 w-4 text-sage-600" />
+                  Dolazim
+                </button>
+                <span className="w-px bg-sage-100" />
+                <button
+                  onClick={() => setIntent("decline")}
+                  className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm text-sage-500 transition active:bg-sage-50"
+                >
+                  <X className="h-4 w-4" />
+                  Ne dolazim
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <MessengerPicker intent={intent} onClose={() => setIntent(null)} />
+    </>
   );
 }
 
@@ -755,7 +768,11 @@ function Gallery() {
 
 /* ------- RSVP ------- */
 
+type Intent = "confirm" | "decline";
+
 function Rsvp() {
+  const [intent, setIntent] = useState<Intent | null>(null);
+
   return (
     <section className="relative px-4 pb-32 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
       <motion.div
@@ -790,31 +807,130 @@ function Rsvp() {
         <div className="mx-auto my-8 h-px w-24 gold-divider" />
 
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
-          <a
-            href={confirmHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-cream shadow-soft transition active:from-sage-600 active:to-sage-800 sm:py-3.5"
+          <button
+            onClick={() => setIntent("confirm")}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-cream shadow-soft transition active:from-sage-600 active:to-sage-800 sm:py-3.5"
           >
             <Check className="h-4 w-4" />
             Potvrđujem dolazak
-          </a>
-          <a
-            href={declineHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center justify-center gap-2 rounded-full border border-sage-400/70 bg-cream px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-sage-700 shadow-soft transition active:bg-sage-50 sm:py-3.5"
+          </button>
+          <button
+            onClick={() => setIntent("decline")}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-sage-400/70 bg-cream px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-sage-700 shadow-soft transition active:bg-sage-50 sm:py-3.5"
           >
             <X className="h-4 w-4" />
             Ne dolazim
-          </a>
+          </button>
         </div>
 
         <p className="mt-8 text-xs text-sage-600/80">
-          Klikom se otvara WhatsApp sa unapred pripremljenom porukom.
+          Otvara WhatsApp ili Viber sa unapred pripremljenom porukom.
         </p>
       </motion.div>
+
+      <MessengerPicker intent={intent} onClose={() => setIntent(null)} />
     </section>
+  );
+}
+
+/* ---- Messenger picker modal ---- */
+
+function MessengerPicker({
+  intent,
+  onClose,
+}: {
+  intent: Intent | null;
+  onClose: () => void;
+}) {
+  const links = intent ? rsvpLinks[intent] : null;
+  const title =
+    intent === "confirm" ? "Potvrđujem dolazak" : "Ne dolazim";
+
+  return (
+    <AnimatePresence>
+      {intent && links && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-sage-900/40 px-4 backdrop-blur-sm sm:items-center"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ y: 60, opacity: 0, scale: 0.96 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-cream p-6 shadow-envelope ring-1 ring-sage-200/70"
+          >
+            <button
+              onClick={onClose}
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-sage-500 transition active:bg-sage-100"
+              aria-label="Zatvori"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="mx-auto mb-3 mt-1 h-px w-12 gold-divider" />
+            <p className="text-center text-[0.65rem] uppercase tracking-[0.35em] text-sage-600/80">
+              {title}
+            </p>
+            <h3 className="mt-2 text-center font-serif-display text-2xl italic text-sage-800">
+              Otvori u
+            </h3>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <a
+                href={links.wa}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setTimeout(onClose, 100)}
+                className="flex flex-col items-center gap-2 rounded-2xl border border-sage-200 bg-white px-4 py-5 text-sage-800 shadow-sm transition active:bg-sage-50"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white">
+                  <WhatsAppIcon className="h-6 w-6" />
+                </span>
+                <span className="text-sm font-medium">WhatsApp</span>
+              </a>
+              <a
+                href={links.viber}
+                onClick={() => setTimeout(onClose, 100)}
+                className="flex flex-col items-center gap-2 rounded-2xl border border-sage-200 bg-white px-4 py-5 text-sage-800 shadow-sm transition active:bg-sage-50"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#7360F2] text-white">
+                  <ViberIcon className="h-6 w-6" />
+                </span>
+                <span className="text-sm font-medium">Viber</span>
+              </a>
+            </div>
+
+            <p className="mt-5 text-center text-[0.7rem] text-sage-600/80">
+              Aplikacija će se otvoriti sa porukom — samo pošaljite.
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* Brand SVG icons */
+function WhatsAppIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.967-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488" />
+    </svg>
+  );
+}
+
+function ViberIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M11.398.002C9.473.028 5.331.344 3.014 2.467 1.294 4.187.687 6.7.617 9.83c-.062 3.122-.142 8.974 5.51 10.567h.005l-.005 2.426s-.038.978.61 1.18c.778.242 1.241-.5 1.987-1.302.413-.439.98-1.087 1.412-1.583 3.864.327 6.832-.418 7.171-.528.78-.253 5.187-.82 5.903-6.67.74-6.034-.36-9.846-2.34-11.566l-.013-.005c-.6-.552-3.022-2.32-8.42-2.34 0 0-.396-.026-1.04-.026zm.066 1.752c.546-.004.881.018.881.018 4.566.013 6.751 1.388 7.262 1.851 1.674 1.434 2.534 4.871 1.908 9.913-.598 4.881-4.166 5.19-4.823 5.401-.282.09-2.881.736-6.146.522 0 0-2.434 2.937-3.194 3.704-.119.123-.258.171-.351.149-.13-.032-.166-.188-.165-.418l.022-4.034c-4.785-1.328-4.504-6.31-4.452-8.916.058-2.604.549-4.732 2.003-6.16 1.95-1.755 5.469-2.011 7.105-2.022.022 0 1.4-.01 1.95-.008zm.245 2.564a.42.42 0 0 0-.418.418c0 .226.187.418.418.418 2.063.005 3.748.708 5.073 2.022 1.349 1.34 2.04 3.139 2.057 5.508a.418.418 0 0 0 .418.418v-.005a.422.422 0 0 0 .418-.413v-.005c-.022-2.541-.788-4.62-2.298-6.119h.018c-1.486-1.475-3.366-2.237-5.668-2.242h-.018zm-3.748.766a.962.962 0 0 0-.586.073h-.013c-.404.155-.61.413-.787.668-.257.359-.408.71-.408.985-.005.158.027.317.094.466.182.404.514.847.989 1.385.475.535.957.916 1.31 1.146.444.282.852.502 1.222.659.343.144.658.215.946.166.302-.054.572-.226.755-.482l.018-.022c.188-.245.387-.484.598-.711.156-.166.207-.288.207-.404a.654.654 0 0 0-.106-.382c-.137-.205-.287-.396-.444-.582l-.022-.022c-.182-.213-.396-.339-.6-.4a.745.745 0 0 0-.467.022.726.726 0 0 0-.247.124l-.013.013c-.166.146-.302.244-.418.297-.108.05-.232.062-.32 0-.207-.13-.413-.33-.6-.6a3.69 3.69 0 0 1-.395-.738v-.005a.292.292 0 0 1 .054-.27c.07-.085.155-.165.247-.236.072-.054.142-.118.21-.184a.66.66 0 0 0 .124-.207.74.74 0 0 0 .022-.467.948.948 0 0 0-.4-.6l-.022-.022c-.187-.158-.378-.308-.583-.444a.65.65 0 0 0-.382-.106.96.96 0 0 0-.418.124zm5.066.516a.418.418 0 0 0-.418.418v.005c0 .227.187.418.418.418 1.392 0 2.484.435 3.298 1.279.81.842 1.226 1.948 1.244 3.32a.422.422 0 0 0 .418.418v-.005a.422.422 0 0 0 .418-.413v-.005c-.022-1.6-.519-2.92-1.493-3.93-.974-1.014-2.323-1.504-3.885-1.504zm.435 1.692a.418.418 0 0 0-.413.418v.005c0 .227.187.413.418.413.706 0 1.244.222 1.659.677.413.466.62 1.04.633 1.756 0 .226.187.413.418.413v-.005a.422.422 0 0 0 .418-.413v-.005c-.018-.92-.302-1.694-.851-2.31-.55-.61-1.32-.949-2.275-.949h-.005z" />
+    </svg>
   );
 }
 
